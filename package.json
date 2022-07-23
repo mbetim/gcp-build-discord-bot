@@ -1,5 +1,5 @@
 {
-  "name": "discord-build-gcp",
+  "name": "gcp-build-discord-bot",
   "version": "1.0.0",
   "main": "./dist/index.js",
   "author": "Matheus Betim <mbetim47@gmail.com>",
