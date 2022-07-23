@@ -1,8 +1,19 @@
 import { Message, PubSub } from "@google-cloud/pubsub";
+import { MessageEmbed } from "discord.js";
 import { startDiscordClient } from "./bot";
 import { CloudBuildMessage } from "./types/CloudBuild";
 
 const gcpBuildMaps = new Map();
+
+const statusEmojiMap = new Map([
+  ["SUCCESS", ":white_check_mark:"],
+  ["FAILURE", ":x:"],
+  ["INTERNAL_ERROR", ":x:"],
+  ["TIMEOUT", ":x:"],
+  ["CANCELLED", ":x:"],
+  ["WORKING", ":hourglass:"],
+  ["QUEUED", ":checkered_flag:"],
+]);
 
 const start = async () => {
   const discordClient = await startDiscordClient();
@@ -30,9 +41,19 @@ const start = async () => {
     if (!channel) return console.error("No channel found for project:", buildMap.name);
     if (!channel.isText()) return console.error("Channel is not a text channel");
 
-    channel.send(
-      `Build ${messageData.status} for ${buildMap.name} (${messageData.substitutions?.REPO_NAME})`
-    );
+    const messageEmbed = new MessageEmbed({ title: "GCP Build Update" });
+    messageEmbed.addFields([
+      { name: "Project", value: buildMap.name, inline: true },
+      {
+        name: "Status",
+        value: `${statusEmojiMap.get(messageData.status)} ${messageData.status}`,
+        inline: true,
+      },
+    ]);
+
+    messageEmbed.setTimestamp();
+
+    channel.send({ embeds: [messageEmbed] });
 
     message.ack();
   });
